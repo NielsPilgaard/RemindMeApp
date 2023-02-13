@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "RemindMeApp": {
+    "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

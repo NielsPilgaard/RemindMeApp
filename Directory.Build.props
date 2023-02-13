@@ -6,22 +6,15 @@
 
   <PropertyGroup Label="Information">
 		<LangVersion>latest</LangVersion>
-		<NoWarn>$(NoWarn);CS1701;CS1702;CS1591;AD0001;IDE1006;</NoWarn>
+		<NoWarn>$(NoWarn);CS1701;CS1702;CS1591;AD0001;IDE1006;CS8625;IDE0058;</NoWarn>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Authors>Niels Pilgaard</Authors>
     <Copyright>Copyright Niels Pilgaard</Copyright>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PackageIcon>logo_128x128.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <MinVerIgnoreHeight>true</MinVerIgnoreHeight>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DebugType>embedded</DebugType>
     <Deterministic>true</Deterministic>
-    <RepositoryUrl>https://github.com/NielsPilgaard/Pilgaard.RemindMeApp</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/NielsPilgaard/Pilgaard.RemindMeApp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/NielsPilgaard/RemindMeApp</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/NielsPilgaard/RemindMeApp</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup Label="Exposing Internals to Test Projects">

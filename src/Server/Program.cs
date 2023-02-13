@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
-using RemindMeApp.Server;
+using RemindMeApp.Server.Authentication;
+using RemindMeApp.Server.Data;
 using RemindMeApp.Server.Extensions;
 using RemindMeApp.Server.Reminders;
 using Serilog;
@@ -7,26 +9,37 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
+StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+
 // Add Serilog
 builder.AddSerilog();
 
 // Configure the database
-var connectionString = builder.Configuration.GetConnectionString("RemindMeDbContext") ?? "Data Source=.db/Reminders.db";
+string connectionString = builder.Configuration.GetConnectionString("RemindMeDbContext") ?? "Data Source=.db/Reminders.db";
 builder.Services.AddSqlite<RemindMeDbContext>(connectionString);
 
-// Configure Open API
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.Configure<SwaggerGeneratorOptions>(options
-    => options.InferSecuritySchemes = true);
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<RemindMeDbContext>();
 
-// Configure rate limiting
-builder.Services.AddRateLimiting();
+builder.Services.AddIdentityServer()
+    .AddApiAuthorization<ApplicationUser, RemindMeDbContext>();
 
-StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
+builder.Services.AddAuthentication()
+    .AddIdentityServerJwt();
 
-// Add services to the container.
+builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+if (builder.Environment.IsDevelopment())
+{
+    // Configure Open API
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+    builder.Services.Configure<SwaggerGeneratorOptions>(options
+        => options.InferSecuritySchemes = true);
+
+    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+}
 
 var app = builder.Build();
 
@@ -36,17 +49,19 @@ app.UseSerilogRequestLogging();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseMigrationsEndPoint();
     app.UseWebAssemblyDebugging();
+
     app.UseSwagger();
     app.UseSwaggerUI();
+    //app.Map("/", () => Results.Redirect("/swagger"));
 }
 else
 {
+    app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-app.UseRateLimiter();
 
 app.UseHttpsRedirection();
 
@@ -55,13 +70,14 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.Map("/", () => Results.Redirect("/swagger"));
+app.UseIdentityServer();
+app.UseAuthorization();
 
 // Configure the APIs
 app.MapReminders();
-
+app.MapOpenIdConnectEndpoint();
 app.MapRazorPages();
-
+app.MapControllers();
 app.MapFallbackToFile("index.html");
 
 app.Run();

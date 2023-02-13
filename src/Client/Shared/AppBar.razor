@@ -1,10 +1,7 @@
-<MudAppBar Fixed="false" Elevation="5" Style="@($"background: linear-gradient(90deg, {Colors.Teal.Darken2} 0%, {Colors.Teal.Darken3} 35%);")">
+<MudAppBar Class="auth" Fixed="false" Elevation="5" Style="@($"background: linear-gradient(90deg, {Colors.Teal.Darken2} 0%, {Colors.Teal.Darken3} 35%);")">
     <MudButton Color="Color.Inherit" Href="/">
-        <MudText Typo="Typo.h3" Class="logo-text">REMIND ME</MudText><MudText Typo="Typo.h6" Class="ml-2 d-none d-sm-flex">dotnet blog</MudText>
+        <MudText Typo="Typo.h3">REMIND ME</MudText>
     </MudButton>
     <MudSpacer />
-    <MudIconButton Icon="@Icons.Custom.Brands.LinkedIn" Color="Color.Inherit" Link="https://www.linkedin.com/in/niels-pilgaard/" Title="My LinkedIn Profile" Target="_blank" />
-    <MudIconButton Icon="@Icons.Custom.Brands.Twitter" Color="Color.Inherit" Link="https://twitter.com/Niels_Pilgaard" Title="My Twitter Profile" Target="_blank" />
-    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/NielsPilgaard" Title="My GitHub Profile" Target="_blank" />
-    <MudIconButton Icon="@Icons.Material.Filled.Code" Color="Color.Inherit" Link="https://github.com/NielsPilgaard/Pilgaard.Blog" Title="Source Code for this website" Target="_blank" />
+    <LoginDisplay />
 </MudAppBar>
