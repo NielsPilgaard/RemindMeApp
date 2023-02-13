@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.EntityFrameworkCore;
+using RemindMeApp.Server;
 using RemindMeApp.Server.Authentication;
 using RemindMeApp.Server.Data;
 using RemindMeApp.Server.Extensions;
@@ -9,24 +10,27 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
-StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
-
 // Add Serilog
 builder.AddSerilog();
 
 // Configure the database
-string connectionString = builder.Configuration.GetConnectionString("RemindMeDbContext") ?? "Data Source=.db/Reminders.db";
+string connectionString = builder.Configuration.GetConnectionString("RemindMeDbContext") ??
+                          throw new InvalidOperationException("Connection string 'RemindMeDbContext' not found.");
 builder.Services.AddSqlite<RemindMeDbContext>(connectionString);
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<RemindMeDbContext>();
 
 builder.Services.AddIdentityServer()
+    .AddConfigurationStore(options =>
+        options.ConfigureDbContext = b => b.UseSqlite(connectionString))
+    .AddOperationalStore(options =>
+        options.ConfigureDbContext = b => b.UseSqlite(connectionString))
     .AddApiAuthorization<ApplicationUser, RemindMeDbContext>();
 
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
-
+builder.Services.AddLocalApiAuthentication();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
@@ -54,7 +58,7 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwagger();
     app.UseSwaggerUI();
-    //app.Map("/", () => Results.Redirect("/swagger"));
+    app.Map("/", () => Results.Redirect("/swagger"));
 }
 else
 {
@@ -79,5 +83,7 @@ app.MapOpenIdConnectEndpoint();
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+
+await app.InitializeDatabaseAsync();
 
 app.Run();
