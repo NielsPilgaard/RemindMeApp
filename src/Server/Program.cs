@@ -1,12 +1,8 @@
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
-using RemindMeApp.Server;
-using RemindMeApp.Server.Authentication;
 using RemindMeApp.Server.Data;
 using RemindMeApp.Server.Extensions;
 using RemindMeApp.Server.Reminders;
 using Serilog;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,26 +18,16 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddEntityFrameworkStores<RemindMeDbContext>();
 
 builder.Services.AddIdentityServer()
-    .AddConfigurationStore(options =>
-        options.ConfigureDbContext = b => b.UseSqlite(connectionString))
-    .AddOperationalStore(options =>
-        options.ConfigureDbContext = b => b.UseSqlite(connectionString))
     .AddApiAuthorization<ApplicationUser, RemindMeDbContext>();
 
 builder.Services.AddAuthentication()
     .AddIdentityServerJwt();
-builder.Services.AddLocalApiAuthentication();
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 if (builder.Environment.IsDevelopment())
 {
-    // Configure Open API
-    builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
-    builder.Services.Configure<SwaggerGeneratorOptions>(options
-        => options.InferSecuritySchemes = true);
-
     builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 }
 
@@ -55,10 +41,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
     app.UseWebAssemblyDebugging();
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    app.Map("/", () => Results.Redirect("/swagger"));
 }
 else
 {
@@ -79,8 +61,10 @@ app.UseAuthorization();
 
 // Configure the APIs
 app.MapReminders();
-app.MapOpenIdConnectEndpoint();
+
 app.MapRazorPages();
+
+// Needed for auth
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 

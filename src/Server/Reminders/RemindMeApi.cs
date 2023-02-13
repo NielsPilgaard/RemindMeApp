@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RemindMeApp.Server.Authentication;
 using RemindMeApp.Server.Data;
-using RemindMeApp.Server.Extensions;
 
 namespace RemindMeApp.Server.Reminders;
 

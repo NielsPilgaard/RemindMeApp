@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using RemindMeApp.Server.Data;
 
-namespace RemindMeApp.Server;
+namespace RemindMeApp.Server.Data;
 
 public static class DatabaseInitializer
 {
@@ -14,8 +13,6 @@ public static class DatabaseInitializer
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
 
         if (pendingMigrations.Any())
-        {
             await context.Database.MigrateAsync();
-        }
     }
 }

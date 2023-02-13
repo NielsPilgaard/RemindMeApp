@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace RemindMeApp.Server.Extensions;
+namespace RemindMeApp.Server.Authentication;
 
 internal static class HttpContextExtensions
 {
