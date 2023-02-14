@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using RemindMeApp.Server.Data;
 
 namespace RemindMeApp.Server.Authentication;
@@ -26,7 +25,7 @@ public static class AuthExtensions
             .AddIdentityServerJwt();
 
         // Used to send email confirmation links, reset password etc
-        services.AddTransient<IEmailSender, EmailSender>();
+        //services.AddTransient<IEmailSender, EmailSender>();
 
         return services;
     }
