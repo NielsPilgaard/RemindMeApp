@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication;
+using RemindMeApp.Server.Authentication;
 using RemindMeApp.Server.Data;
 using RemindMeApp.Server.Extensions;
 using RemindMeApp.Server.Reminders;
@@ -6,22 +6,13 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Serilog
 builder.AddSerilog();
 
-// Configure the database
 string connectionString = builder.Configuration.GetConnectionString("RemindMeDbContext") ??
                           throw new InvalidOperationException("Connection string 'RemindMeDbContext' not found.");
 builder.Services.AddSqlite<RemindMeDbContext>(connectionString);
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<RemindMeDbContext>();
-
-builder.Services.AddIdentityServer()
-    .AddApiAuthorization<ApplicationUser, RemindMeDbContext>();
-
-builder.Services.AddAuthentication()
-    .AddIdentityServerJwt();
+builder.Services.AddAuthenticationAndAuthorization();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -33,7 +24,6 @@ if (builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-// Add Serilog requests logging
 app.UseSerilogRequestLogging();
 
 // Configure the HTTP request pipeline.
@@ -56,16 +46,16 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseIdentityServer();
-app.UseAuthorization();
+app.UseAuthenticationAndAuthorization();
 
 // Configure the APIs
 app.MapReminders();
 
-app.MapRazorPages();
-
 // Needed for auth
+app.MapRazorPages();
 app.MapControllers();
+
+// Load the index.html from the wasm client
 app.MapFallbackToFile("index.html");
 
 await app.InitializeDatabaseAsync();
