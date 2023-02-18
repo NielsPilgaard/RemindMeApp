@@ -1,18 +1,27 @@
-using Duende.IdentityServer.EntityFramework.Options;
-using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using RemindMeApp.Server.Reminders;
 
 namespace RemindMeApp.Server.Data;
 
-public class RemindMeDbContext : ApiAuthorizationDbContext<ApplicationUser>
+public class RemindMeDbContext : IdentityDbContext<ApplicationUser>
 {
     public DbSet<Reminder> Reminders => Set<Reminder>();
 
     public RemindMeDbContext(
-        DbContextOptions options,
-        IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)
+        DbContextOptions<RemindMeDbContext> options) : base(options)
     {
+    }
+
+
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        builder.Entity<Reminder>()
+            .HasOne<ApplicationUser>()
+            .WithMany()
+            .HasForeignKey(reminder => reminder.OwnerId)
+            .HasPrincipalKey(applicationUser => applicationUser.UserName);
+
+        base.OnModelCreating(builder);
     }
 }
