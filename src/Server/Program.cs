@@ -12,7 +12,8 @@ string connectionString = builder.Configuration.GetConnectionString("RemindMeDbC
                           throw new InvalidOperationException("Connection string 'RemindMeDbContext' not found.");
 builder.Services.AddSqlite<RemindMeDbContext>(connectionString);
 
-builder.Services.AddAuthenticationAndAuthorization();
+builder.AddAuthentication();
+builder.Services.AddAuthorizationBuilder();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -46,14 +47,13 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthenticationAndAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the APIs
-app.MapReminders();
-
-// Needed for auth
-app.MapRazorPages();
-app.MapControllers();
+app.MapGroup("/api")
+   .MapAuthentication()
+   .MapReminders();
 
 // Load the index.html from the wasm client
 app.MapFallbackToFile("index.html");
