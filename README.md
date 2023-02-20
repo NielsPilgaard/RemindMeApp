@@ -18,7 +18,6 @@ It isn't production-ready... At all :smile:
 - Send hourly/daily/weekly/monthly/yearly
 - Send with a fixed time interval (send reminder every 6 hours for example)
 - Send once at a specific date and time.
-- 
 
 **Get reminders about upcoming events :calendar:**
 
@@ -30,7 +29,18 @@ It isn't production-ready... At all :smile:
 
 - Reminders are only sent to devices that have opted in
 
+## Things I want to gain experience with
 
+- Authentication & Authorization
+- Scheduling
+- Blazor
+- Postgres
+- MinimalAPIs
+- AWS
+    - SES (Simple Email Service)
+    - SNS (Simple Notification Service)
+    - EC2 (For Web App Hosting)
+    - Lambda (For sending reminders)
 
 ## Roadmap
 
@@ -39,3 +49,9 @@ It isn't production-ready... At all :smile:
     - MFA
     - Register email
     - Register phone number
+- Reminders
+    - :email: Email
+    - :iphone: SMS
+    - :fist_right: Push Notication
+    - Scheduling options
+    - Calendar sync
