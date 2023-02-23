@@ -55,3 +55,7 @@ It isn't production-ready... At all :smile:
     - :fist_right: Push Notication
     - Scheduling options
     - Calendar sync
+
+## Thanks to
+
+[David Fowler](https://github.com/davidfowl) for making the [TodoApi](https://github.com/davidfowl/TodoApi), a large part of this project is based on that.
