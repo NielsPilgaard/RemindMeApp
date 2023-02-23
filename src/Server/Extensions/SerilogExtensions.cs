@@ -17,7 +17,7 @@ public static class SerilogExtensions
 
             if (builder.Environment.IsDevelopment())
             {
-                loggerConfiguration.WriteTo.Console();
+                loggerConfiguration.WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss}] [{Level}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
             }
         });
 
