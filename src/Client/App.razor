@@ -1,25 +1,41 @@
-<CascadingAuthenticationState>
-  <Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-      <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-        <NotAuthorized>
-          @if (context.User.Identity?.IsAuthenticated != true)
-          {
-            <RedirectToLogin />
-          }
-          else
-          {
-            <p role="alert">You are not authorized to access this resource.</p>
-          }
-        </NotAuthorized>
-      </AuthorizeRouteView>
-      <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-      <PageTitle>Not found</PageTitle>
-      <LayoutView Layout="@typeof(MainLayout)">
-        <p role="alert">Sorry, there's nothing at this address.</p>
-      </LayoutView>
-    </NotFound>
-  </Router>
-</CascadingAuthenticationState>
+@page "/"
+
+@inject AuthClient Client
+
+@if (!string.IsNullOrEmpty(CurrentUser))
+{
+  <ul class="nav justify-content-center">
+    <li class="nav-item">
+      Logged in as <strong>@CurrentUser</strong>
+      <a class="btn btn-primary" role="button" @onclick="@Logout">Logout</a>
+    </li>
+  </ul>
+
+  <ReminderList OnForbidden="@Logout" />
+}
+else
+{
+  <LogInForm OnLoggedIn="@HandleLogin" SocialProviders="@SocialProviders" />
+}
+
+@code {
+  [Parameter]
+  public string? CurrentUser { get; set; }
+
+  [Parameter]
+  public string[] SocialProviders { get; set; } = Array.Empty<string>();
+
+
+  void HandleLogin(string newUsername)
+  {
+    CurrentUser = newUsername;
+  }
+
+  async Task Logout()
+  {
+    if (await Client.LogoutAsync())
+    {
+      CurrentUser = null;
+    }
+  }
+}

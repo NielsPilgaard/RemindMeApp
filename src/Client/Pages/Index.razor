@@ -1,6 +1,42 @@
 @page "/"
 
-<PageTitle>Index</PageTitle>
+@inject AuthClient Client
 
-<MudText Typo="Typo.h3" GutterBottom="true">Hello, world!</MudText>
-<MudText Class="mb-8">Welcome to your new app, powered by MudBlazor!</MudText>
+@if (!string.IsNullOrEmpty(CurrentUser))
+{
+    <ul class="nav justify-content-center">
+        <li class="nav-item">
+            Logged in as <strong>@CurrentUser</strong>
+            <a class="btn btn-primary" role="button" @onclick="@Logout">Logout</a>
+        </li>
+    </ul>
+
+    <ReminderList OnForbidden="@Logout" />
+}
+else
+{
+    <LogInForm OnLoggedIn="@HandleLogin" SocialProviders="@SocialProviders" />
+}
+
+@code {
+    [Parameter]
+    public string? CurrentUser { get; set; }
+
+    [Parameter]
+    public string[] SocialProviders { get; set; } = Array.Empty<string>();
+
+
+    void HandleLogin(string newUsername)
+    {
+        CurrentUser = newUsername;
+    }
+
+    async Task Logout()
+    {
+        if (await Client.LogoutAsync())
+        {
+            CurrentUser = null;
+        }
+    }
+}
+
