@@ -1,4 +1,5 @@
 using RemindMeApp.Server.Authentication;
+using RemindMeApp.Server.Authorization;
 using RemindMeApp.Server.Data;
 using RemindMeApp.Server.Extensions;
 using RemindMeApp.Server.Reminders;
@@ -13,15 +14,18 @@ string connectionString = builder.Configuration.GetConnectionString("RemindMeDbC
 builder.Services.AddSqlite<RemindMeDbContext>(connectionString);
 
 builder.AddAuthentication();
-builder.Services.AddAuthorizationBuilder();
+builder.Services.AddAuthorizationBuilder().AddCurrentUserHandler();
+
+builder.Services.AddTokenService();
+
+// State that represents the current user from the database *and* the request
+builder.Services.AddCurrentUser();
+
+// Configure rate limiting
+builder.Services.AddRateLimiting();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-}
 
 var app = builder.Build();
 
@@ -30,7 +34,6 @@ app.UseSerilogRequestLogging();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
     app.UseWebAssemblyDebugging();
 }
 else
@@ -39,6 +42,8 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseRateLimiter();
 
 app.UseHttpsRedirection();
 
@@ -51,12 +56,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Configure the APIs
-app.MapGroup("/api")
-   .MapAuthentication()
-   .MapReminders();
+app.MapAuthentication();
+app.MapReminders();
 
-// Load the index.html from the wasm client
-app.MapFallbackToFile("index.html");
+// Load the _Host file from the wasm host (this)
+app.MapFallbackToPage("/_Host");
 
 await app.InitializeDatabaseAsync();
 
