@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using RemindMeApp.Shared;
 
 namespace RemindMeApp.Server.Reminders;
 
@@ -15,22 +16,13 @@ public class Reminder
     [Required]
     public string Title { get; set; } = default!;
     public string? Description { get; set; }
-    public NotificationType NotificationType { get; set; }
+    //public NotificationType NotificationType { get; set; }
     public bool IsComplete { get; set; }
     [Required]
     public DateTime ScheduleUtc { get; set; }
 
     [Required]
     public string OwnerId { get; set; } = default!;
-}
-
-// The DTO that excludes the OwnerId (we don't want that exposed to clients)
-public class ReminderItem
-{
-    public int Id { get; set; }
-    [Required]
-    public string Title { get; set; } = default!;
-    public bool IsComplete { get; set; }
 }
 
 public static class TodoMappingExtensions
