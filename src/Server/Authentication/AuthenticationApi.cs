@@ -14,22 +14,21 @@ public static class AuthenticationApi
 
         group.MapPost("register", async ([FromBody] UserInfo userInfo, [FromServices] IUserService userService) =>
         {
-            // Retrieve the access token given the user info
-            var token = await userService.CreateUserAsync(userInfo);
+            bool userCreated = await userService.CreateUserAsync(userInfo);
 
-            return token is null
-                ? Results.Unauthorized()
-                : SignIn(userInfo, token.Value);
+            return userCreated
+                ? SignIn(userInfo)
+                : Results.Unauthorized();
         });
 
         group.MapPost("login", async ([FromBody] UserInfo userInfo, [FromServices] IUserService userService) =>
         {
-            // Retrieve the access token given the user info
-            var token = await userService.GetTokenAsync(userInfo);
+            // Check whether the user exists
+            bool userExists = await userService.UserExistsAsync(userInfo);
 
-            return token is null
-                ? Results.Unauthorized()
-                : SignIn(userInfo, token.Value);
+            return userExists
+                ? SignIn(userInfo)
+                : Results.Unauthorized();
         });
 
         group.MapPost("logout", async context =>
@@ -71,13 +70,7 @@ public static class AuthenticationApi
                 // for now we'll prefer the email address
                 string name = (principal.FindFirstValue(ClaimTypes.Email) ?? principal.Identity?.Name)!;
 
-                var token = await userService.GetOrCreateUserAsync(provider, new ExternalUserInfo { Username = name, ProviderKey = id });
-
-                if (token is not null)
-                {
-                    // Write the login cookie
-                    await SignIn(id, name, token.Value, provider, result.Properties.GetTokens()).ExecuteAsync(context);
-                }
+                await SignIn(id, name, provider, result.Properties.GetTokens()).ExecuteAsync(context);
             }
 
             // Delete the external cookie
@@ -91,14 +84,13 @@ public static class AuthenticationApi
         return group;
     }
 
-    private static IResult SignIn(UserInfo userInfo, string token)
+    private static IResult SignIn(UserInfo userInfo)
         => SignIn(userInfo.Username,
                 userInfo.Username,
-                token,
                 providerName: null,
                 authTokens: Enumerable.Empty<AuthenticationToken>());
 
-    private static IResult SignIn(string userId, string userName, string token, string? providerName, IEnumerable<AuthenticationToken> authTokens)
+    private static IResult SignIn(string userId, string userName, string? providerName, IEnumerable<AuthenticationToken> authTokens)
     {
         var identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
         identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
@@ -117,13 +109,6 @@ public static class AuthenticationApi
         {
             properties.SetHasExternalToken(true);
         }
-
-        //var tokens = hasAuthToken ? authTokens : new[]
-        //{
-        //    new AuthenticationToken { Name = TokenNames.AccessToken, Value = token }
-        //};
-
-        //properties.StoreTokens(tokens);
 
         return Results.SignIn(new ClaimsPrincipal(identity),
             properties: properties,

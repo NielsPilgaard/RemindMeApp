@@ -16,8 +16,6 @@ builder.Services.AddSqlite<RemindMeDbContext>(connectionString);
 builder.AddAuthentication();
 builder.Services.AddAuthorizationBuilder().AddCurrentUserHandler();
 
-builder.Services.AddTokenService();
-
 // State that represents the current user from the database *and* the request
 builder.Services.AddCurrentUser();
 
