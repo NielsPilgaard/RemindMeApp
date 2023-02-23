@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RemindMeApp.Server.Authentication;
 using RemindMeApp.Server.Data;
+using RemindMeApp.Server.Extensions;
+using RemindMeApp.Shared;
 
 namespace RemindMeApp.Server.Reminders;
 
@@ -10,20 +12,22 @@ internal static class RemindMeApi
 {
     public static RouteGroupBuilder MapReminders(this IEndpointRouteBuilder routes)
     {
-        var group = routes.MapGroup("/reminders");
+        var group = routes.MapGroup("api/reminders");
 
         group.RequireAuthorization();
 
+        group.RequirePerUserRateLimit();
+
         group.WithTags("Reminders");
 
-        group.MapGet("/", async ([FromServices] RemindMeDbContext db, HttpContext context) =>
+        group.MapGet("", async ([FromServices] RemindMeDbContext db, HttpContext context) =>
             await db.Reminders.Where(reminder =>
                     reminder.OwnerId == context.GetUserId())
                 .Select(reminder => reminder.AsReminderItem())
                 .AsNoTracking()
                 .ToListAsync());
 
-        group.MapGet("/{id:int}",
+        group.MapGet("{id:int}",
             async Task<Results<Ok<ReminderItem>, NotFound>> ([FromServices] RemindMeDbContext db,
                 [FromRoute] int id,
                 HttpContext context) =>
@@ -49,7 +53,7 @@ internal static class RemindMeApi
             db.Reminders.Add(reminder);
             await db.SaveChangesAsync();
 
-            return TypedResults.Created($"/todos/{reminder.Id}", reminder.AsReminderItem());
+            return TypedResults.Created($"/reminders/{reminder.Id}", reminder.AsReminderItem());
         });
 
         group.MapPut("/{id:int}",
