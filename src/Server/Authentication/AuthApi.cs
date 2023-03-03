@@ -2,11 +2,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using RemindMeApp.Server.Authorization;
 using RemindMeApp.Shared;
 
 namespace RemindMeApp.Server.Authentication;
 
-public static class AuthenticationApi
+public static class AuthApi
 {
     public static RouteGroupBuilder MapAuthentication(this IEndpointRouteBuilder routes)
     {
@@ -24,9 +25,9 @@ public static class AuthenticationApi
         group.MapPost("login", async ([FromBody] UserInfo userInfo, [FromServices] IUserService userService) =>
         {
             // Check whether the user exists
-            bool userExists = await userService.UserExistsAsync(userInfo);
+            bool loginIsValid = await userService.LoginIsValid(userInfo);
 
-            return userExists
+            return loginIsValid
                 ? SignIn(userInfo)
                 : Results.Unauthorized();
         });
@@ -49,16 +50,21 @@ public static class AuthenticationApi
         group.MapGet("login/{provider}", ([FromRoute] string provider) =>
         {
             // Trigger the external login flow by issuing a challenge with the provider name.
-            // This name maps to the registered authentication scheme names in AuthenticationExtensions.cs
+            // This name maps to the registered authentication scheme names in AuthExtensions.cs
             return Results.Challenge(
                 properties: new AuthenticationProperties { RedirectUri = $"/authentication/signin/{provider}" },
                 authenticationSchemes: new[] { provider });
         });
 
+        group.MapGet("current-user", ([FromServices] CurrentUser? currentUser)
+            => currentUser is null
+                ? null
+                : CurrentUserDto.From(currentUser.Principal));
+
         group.MapGet("signin/{provider}", async ([FromRoute] string provider, [FromServices] IUserService userService, HttpContext context) =>
         {
             // Grab the login information from the external login dance
-            var result = await context.AuthenticateAsync(AuthenticationConstants.ExternalScheme);
+            var result = await context.AuthenticateAsync(AuthConstants.ExternalScheme);
 
             if (result.Succeeded)
             {
@@ -74,7 +80,7 @@ public static class AuthenticationApi
             }
 
             // Delete the external cookie
-            await context.SignOutAsync(AuthenticationConstants.ExternalScheme);
+            await context.SignOutAsync(AuthConstants.ExternalScheme);
 
             // TODO: Handle the failure somehow
 
@@ -114,9 +120,4 @@ public static class AuthenticationApi
             properties: properties,
             authenticationScheme: CookieAuthenticationDefaults.AuthenticationScheme);
     }
-}
-
-public class TokenNames
-{
-    public static readonly string AccessToken = "access_token";
 }

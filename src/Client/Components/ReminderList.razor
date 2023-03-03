@@ -1,6 +1,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Net
 @using RemindMeApp.Shared
+
 @inject ReminderClient Client
 
 @if (_reminders is null)
@@ -41,10 +42,7 @@ else
 
     [Required]
     public string? NewReminder { get; set; }
-
-    [Parameter] 
-    public EventCallback OnForbidden { get; set; }
-
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadReminders();
@@ -52,12 +50,7 @@ else
 
     async Task LoadReminders()
     {
-        (var statusCode, _reminders) = await Client.GetRemindersAsync();
-
-        if (statusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
-        {
-            await OnForbidden.InvokeAsync();
-        }
+        (_, _reminders) = await Client.GetRemindersAsync();
     }
 
     async Task AddTodo()

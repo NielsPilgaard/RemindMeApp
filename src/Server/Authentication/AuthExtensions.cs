@@ -5,7 +5,7 @@ using RemindMeApp.Server.Data;
 
 namespace RemindMeApp.Server.Authentication;
 
-public static class AuthenticationExtensions
+public static class AuthExtensions
 {
     private delegate void ExternalAuthProvider(AuthenticationBuilder authenticationBuilder, Action<object> configure);
 
@@ -25,7 +25,7 @@ public static class AuthenticationExtensions
         authenticationBuilder.AddCookie();
 
         // This is the cookie that will store the user information from the external login provider
-        authenticationBuilder.AddCookie(AuthenticationConstants.ExternalScheme);
+        authenticationBuilder.AddCookie(AuthConstants.ExternalScheme);
 
         // Add external auth providers based on configuration
         //{
@@ -64,7 +64,7 @@ public static class AuthenticationExtensions
                     // This will save the information in the external cookie
                     if (options is RemoteAuthenticationOptions remoteAuthenticationOptions)
                     {
-                        remoteAuthenticationOptions.SignInScheme = AuthenticationConstants.ExternalScheme;
+                        remoteAuthenticationOptions.SignInScheme = AuthConstants.ExternalScheme;
                     }
                 });
             }

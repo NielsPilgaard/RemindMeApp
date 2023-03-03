@@ -1,7 +1,12 @@
+@page "/authentication/login"
+@using RemindMeApp.Client.Authentication
 @using System.ComponentModel.DataAnnotations
-@inject AuthClient Client
 
-<EditForm Model="@this" class="form-horizontal py-5" OnValidSubmit="@Login">
+@inject AuthStateProvider Client
+@inject NavigationManager NavigationManager
+
+
+<EditForm Model="@this" class="form-horizontal py-5" OnValidSubmit="@LoginUser">
     <DataAnnotationsValidator />
     <div class="mb-3">
         <label for="username" class="form-label">User name</label>
@@ -20,10 +25,14 @@
 </EditForm>
 
 <div class="form-horizontal">
+    @*Put social providers here
+
     @foreach (var provider in SocialProviders)
     {
-        <a class="btn btn-secondary m-1" role="button" href="authentication/login/@provider">@provider</a>
+    <a class="btn btn-secondary m-1" role="button" href="authentication/login/@provider">@provider</a>
     }
+
+    *@
 </div>
 
 @if (!string.IsNullOrEmpty(_alertMessage))
@@ -35,28 +44,23 @@
     string? _alertMessage;
 
     [Required]
-    [StringLength(15)] 
+    [StringLength(15)]
     public string? Username { get; set; }
 
-    [Required] 
+    [Required]
     [StringLength(32, MinimumLength = 6, ErrorMessage = "The password must be between 6 and 32 characters long.")]
-    [RegularExpression("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[^a-zA-Z\\d]).*$", 
+    [RegularExpression("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z])(?=.*[^a-zA-Z\\d]).*$",
         MatchTimeoutInMilliseconds = 1000,
         ErrorMessage = "The password must contain a lower-case letter, an upper-case letter, a digit and a special character.")]
     public string? Password { get; set; }
 
-    [Parameter] 
-    public EventCallback<string> OnLoggedIn { get; set; }
 
-    [Parameter]
-    public string[] SocialProviders { get; set; } = Array.Empty<string>();
-
-    async Task Login()
+    async Task LoginUser()
     {
         _alertMessage = null;
         if (await Client.LoginAsync(Username, Password))
         {
-            await OnLoggedIn.InvokeAsync(Username);
+            NavigationManager.NavigateTo("");
         }
         else
         {
@@ -67,11 +71,7 @@
     async Task Create()
     {
         _alertMessage = null;
-        if (await Client.CreateUserAsync(Username, Password))
-        {
-            await OnLoggedIn.InvokeAsync(Username);
-        }
-        else
+        if (!await Client.CreateUserAsync(Username, Password))
         {
             _alertMessage = "Failed to create user";
         }

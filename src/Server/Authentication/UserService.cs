@@ -8,7 +8,7 @@ public interface IUserService
 {
     Task<bool> CreateUserAsync(UserInfo newUser);
 
-    Task<bool> UserExistsAsync(UserInfo userInfo);
+    Task<bool> LoginIsValid(UserInfo userInfo);
 
     Task<bool> GetOrCreateUserAsync(string provider, ExternalUserInfo userInfo);
 }
@@ -29,11 +29,17 @@ public class UserService : IUserService
         return identityResult.Succeeded;
     }
 
-    public async Task<bool> UserExistsAsync(UserInfo userInfo)
+    public async Task<bool> LoginIsValid(UserInfo userInfo)
     {
         var user = await _userManager.FindByNameAsync(userInfo.Username);
+        if (user is null)
+        {
+            return false;
+        }
 
-        return user is not null;
+        bool passwordMatches = await _userManager.CheckPasswordAsync(user, userInfo.Password);
+
+        return passwordMatches;
     }
 
     public async Task<bool> GetOrCreateUserAsync(string provider, ExternalUserInfo userInfo)

@@ -22,9 +22,6 @@ builder.Services.AddCurrentUser();
 // Configure rate limiting
 builder.Services.AddRateLimiting();
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
-
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
@@ -57,8 +54,7 @@ app.UseAuthorization();
 app.MapAuthentication();
 app.MapReminders();
 
-// Load the _Host file from the wasm host (this)
-app.MapFallbackToPage("/_Host");
+app.MapFallbackToFile("index.html");
 
 await app.InitializeDatabaseAsync();
 

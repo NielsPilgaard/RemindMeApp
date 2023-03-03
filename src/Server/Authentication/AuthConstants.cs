@@ -1,6 +1,6 @@
 namespace RemindMeApp.Server.Authentication;
 
-public class AuthenticationConstants
+public class AuthConstants
 {
     public static string ExternalScheme => "External";
 }

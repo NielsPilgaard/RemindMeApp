@@ -26,7 +26,7 @@ public class ExternalProviders
         {
             // We're assuming all schemes that aren't cookies are social
             if (s.Name == CookieAuthenticationDefaults.AuthenticationScheme ||
-                s.Name == AuthenticationConstants.ExternalScheme)
+                s.Name == AuthConstants.ExternalScheme)
             {
                 continue;
             }

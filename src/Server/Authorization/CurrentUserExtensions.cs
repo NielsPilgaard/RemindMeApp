@@ -31,7 +31,7 @@ public static class CurrentUserExtensions
             // to set the current user without adding custom middleware.
             _currentUser.Principal = principal;
 
-            var loginProvider = principal.FindFirstValue("provider");
+            string? loginProvider = principal.FindFirstValue("provider");
 
             if (principal.FindFirstValue(ClaimTypes.NameIdentifier) is { Length: > 0 } name)
             {
