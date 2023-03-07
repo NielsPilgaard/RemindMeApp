@@ -1,0 +1,27 @@
+@using RemindMeApp.Client.Authentication
+@using System.ComponentModel.DataAnnotations
+
+@inject AuthStateProvider Client
+
+<EditForm Model="@_registrationModel" OnValidSubmit="Create">
+    <DataAnnotationsValidator />
+    <MudCard>
+        <MudCardContent>
+            <MudTextField Label="Username"
+                          @bind-Value="_registrationModel.Username" For="@(() => _registrationModel.Username)" />
+            <MudTextField autocomplete="new-password" Label="Password" Class="mt-3"
+                          @bind-Value="_registrationModel.Password" For="@(() => _registrationModel.Password)" InputType="InputType.Password" />
+            <MudTextField autocomplete="new-password" Label="Repeat Password" Class="mt-3"
+                          @bind-Value="_registrationModel.RepeatPassword" For="@(() => _registrationModel.RepeatPassword)" InputType="InputType.Password" />
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+@code {
+    private RegistrationModel _registrationModel = new();
+
+    async Task Create() => await Client.CreateUserAsync(_registrationModel.Username, _registrationModel.Password);
+}

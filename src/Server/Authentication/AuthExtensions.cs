@@ -11,7 +11,11 @@ public static class AuthExtensions
 
     public static WebApplicationBuilder AddAuthentication(this WebApplicationBuilder builder)
     {
-        builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+        builder.Services.AddIdentityCore<ApplicationUser>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = true;
+                options.Password.RequireNonAlphanumeric = false;
+            })
             .AddEntityFrameworkStores<RemindMeDbContext>();
 
         // Used to send email confirmation links, reset password etc
